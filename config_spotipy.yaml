@@ -1,0 +1,4 @@
+username: email
+user_id: myuserid
+spotipy_client_id: myclientid
+spotipy_client_secret: myclientsecret

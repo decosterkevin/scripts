@@ -1,0 +1,21 @@
+
+row: 1
+email_col: 1
+name_col: 2
+option_col: 6
+
+option_1:
+  value: "Value 1"
+  text: |
+    <p>myText for option 1 in HTML format</p>
+
+
+option_2:
+  value: "Value 2"
+  text: |
+    <p>my text for option 2  in HTML format</p>
+
+
+option_default:
+  text: |
+    Default text
