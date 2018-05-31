@@ -7,12 +7,14 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from itertools import islice
 import smtplib
+import time
 import html2text
 
 def main(argv):
     file = ''
     configFile = ''
     textFile = ''
+    cc=''
     try:
 
         opts, args = getopt.getopt(argv, "hf:c:t:")
@@ -39,6 +41,9 @@ def main(argv):
     emailUN=config.get('username')
     emailSMTP =config.get('smtp')
     emailPort = config.get('port')
+
+    cc = config.get('cc')
+
     if None in (emailPort, emailPW, emailSMTP, emailUN ):
         print('error in config file')
         sys.exit()
@@ -70,35 +75,37 @@ def main(argv):
             toAddress = row[emailCol]
             toName = row[nameCol]
             toOption= row[optionCol]
-
+            print("trying to sent email: " + toAddress + "with option " + toOption)
             text=''
             if toOption is None:
                 print("cannot extract option")
             else:
                 if(toOption == option1.get("value")):
                     text = option1.get("text").format(toName)
-                if(toOption == option2.get("value")):
+                elif(toOption == option2.get("value")):
                     text = option2.get("text").format(toName)
                 else:
-                    tmp = option2.get("text")
-                    if tmp is not None:
-                        text = optionDefault.get("text").format(toName)
+                    toOption = None
+            if toOption is not None:
+                msg = MIMEMultipart('alternative')
 
-            msg = MIMEMultipart('alternative')
+                #
+                msg['From'] = emailUN
+                msg['To'] = toAddress
+                msg['Subject'] = "Anniversaire M&K"
 
-            #
-            msg['From'] = emailUN
-            msg['To'] = toAddress
-            msg['Subject'] = "Anniversaire M&K"
+                if cc is not None:
+                    msg['CC'] = cc
 
-            part1 = MIMEText(html2text.html2text(text).encode("UTF-8"), 'plain', "UTF-8")
-            part2 = MIMEText(text.encode("UTF-8"), 'html', "UTF-8")
+                part1 = MIMEText(html2text.html2text(text).encode("UTF-8"), 'plain', "UTF-8")
+                part2 = MIMEText(text.encode("UTF-8"), 'html', "UTF-8")
 
-            msg.attach(part1)
-            msg.attach(part2)
+                msg.attach(part1)
+                msg.attach(part2)
 
-            server.sendmail(msg['From'] ,  msg['To'], msg.as_string())
-            print("email sent to " + toAddress)
+                server.sendmail(msg['From'] ,  msg['To'], msg.as_string())
+                print("email sent to " + toAddress)
+            time.sleep(1.0)
     server.quit()
 
 if __name__ == "__main__":
